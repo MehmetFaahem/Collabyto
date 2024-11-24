@@ -1,12 +1,10 @@
-import { Card, Col, Row, Typography, Avatar, Statistic, List } from 'antd'
-const { Title, Text } = Typography
 import { useUserContext } from '@/core/context'
-import dayjs from 'dayjs'
-import { useLocation, useNavigate, useParams } from '@remix-run/react'
-import { useUploadPublic } from '@/plugins/upload/client'
-import { SocketClient } from '@/plugins/socket/client'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
+import { useParams } from '@remix-run/react'
+import { Avatar, Card, Col, List, Row, Statistic, Typography } from 'antd'
+import dayjs from 'dayjs'
+const { Title, Text } = Typography
 
 export default function DashboardPage() {
   const { organizationId } = useParams()

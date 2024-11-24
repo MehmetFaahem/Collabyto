@@ -37,9 +37,12 @@ model User {
   updatedAt         DateTime           @default(now()) @updatedAt()
   organizationRoles OrganizationRole[]
   documentsAsOwner  Document[]         @relation("owner")
+  documentsEdited   Document[]         @relation("lastEditor")
+  documentsShared   Document[]         @relation("sharedWith")
   tasksAsAssignee   Task[]             @relation("assignee")
   messages          Message[]          @relation("user")
   filesAsOwner      File[]             @relation("owner")
+  documentVersions  DocumentVersion[]  @relation("editor")
 }
 
 /// @@allow('all', true)
@@ -59,17 +62,37 @@ model Folder {
 
 /// @@allow('all', true)
 model Document {
-  id             String        @id() @default(uuid())
+  id             String            @id() @default(uuid())
   title          String
   content        String?
+  version        Int               @default(1)
+  isShared       Boolean           @default(false)
+  externalSync   Json?
   organizationId String
-  organization   Organization? @relation(fields: [organizationId], references: [id], name: "organization")
+  organization   Organization?     @relation(fields: [organizationId], references: [id], name: "organization")
   folderId       String?
-  folder         Folder?       @relation(fields: [folderId], references: [id], name: "folder")
+  folder         Folder?           @relation(fields: [folderId], references: [id], name: "folder")
   ownerId        String
-  owner          User?         @relation(fields: [ownerId], references: [id], name: "owner")
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @default(now()) @updatedAt()
+  owner          User?             @relation(fields: [ownerId], references: [id], name: "owner")
+  lastEditedAt   DateTime          @default(now())
+  lastEditedById String?
+  lastEditedBy   User?             @relation("lastEditor", fields: [lastEditedById], references: [id])
+  sharedWith     User[]            @relation("sharedWith")
+  versions       DocumentVersion[] @relation("document")
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @default(now()) @updatedAt()
+}
+
+/// @@allow('all', true)
+model DocumentVersion {
+  id         String   @id() @default(uuid())
+  version    Int      @default(1)
+  content    String
+  documentId String
+  document   Document @relation("document", fields: [documentId], references: [id], onDelete: Cascade)
+  editedById String
+  editedBy   User     @relation("editor", fields: [editedById], references: [id])
+  editedAt   DateTime @default(now())
 }
 
 /// @@allow('all', true)

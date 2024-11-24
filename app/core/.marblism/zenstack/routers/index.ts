@@ -4,6 +4,7 @@ import type { PrismaClient } from "@zenstackhq/runtime/models";
 import createUserRouter from "./User.router";
 import createFolderRouter from "./Folder.router";
 import createDocumentRouter from "./Document.router";
+import createDocumentVersionRouter from "./DocumentVersion.router";
 import createBoardRouter from "./Board.router";
 import createTaskRouter from "./Task.router";
 import createChannelRouter from "./Channel.router";
@@ -14,6 +15,7 @@ import createOrganizationRoleRouter from "./OrganizationRole.router";
 import { ClientType as UserClientType } from "./User.router";
 import { ClientType as FolderClientType } from "./Folder.router";
 import { ClientType as DocumentClientType } from "./Document.router";
+import { ClientType as DocumentVersionClientType } from "./DocumentVersion.router";
 import { ClientType as BoardClientType } from "./Board.router";
 import { ClientType as TaskClientType } from "./Task.router";
 import { ClientType as ChannelClientType } from "./Channel.router";
@@ -48,6 +50,7 @@ export function createRouter<Config extends BaseConfig>(router: RouterFactory<Co
         user: createUserRouter(router, procedure),
         folder: createFolderRouter(router, procedure),
         document: createDocumentRouter(router, procedure),
+        documentVersion: createDocumentVersionRouter(router, procedure),
         board: createBoardRouter(router, procedure),
         task: createTaskRouter(router, procedure),
         channel: createChannelRouter(router, procedure),
@@ -63,6 +66,7 @@ export interface ClientType<AppRouter extends AnyRouter> {
     user: UserClientType<AppRouter>;
     folder: FolderClientType<AppRouter>;
     document: DocumentClientType<AppRouter>;
+    documentVersion: DocumentVersionClientType<AppRouter>;
     board: BoardClientType<AppRouter>;
     task: TaskClientType<AppRouter>;
     channel: ChannelClientType<AppRouter>;
