@@ -156,13 +156,13 @@ export default function DocumentsPage() {
         </Space>
       ),
     },
-    {
-      title: 'Last Modified',
-      dataIndex: 'updatedAt',
-      key: 'updatedAt',
-      sorter: true,
-      render: (date: string) => date,
-    },
+    // {
+    //   title: 'Last Modified',
+    //   dataIndex: 'updatedAt',
+    //   key: 'updatedAt',
+    //   sorter: true,
+    //   render: (date: string) => date,
+    // },
     {
       title: 'Actions',
       key: 'actions',

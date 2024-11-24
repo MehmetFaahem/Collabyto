@@ -21,6 +21,23 @@ import { SocketClient } from '@/plugins/socket/client'
 import { Api } from '@/core/trpc'
 import { PageLayout } from '@/designSystem'
 
+type Message = {
+  id: string
+  content: string
+  createdAt: Date
+  user?: {
+    id: string
+    name: string
+    pictureUrl?: string
+  }
+}
+
+type Channel = {
+  id: string
+  name: string
+  messages?: Message[]
+}
+
 export default function ChatPage() {
   const { organizationId } = useParams()
   const { user } = useUserContext()
@@ -29,18 +46,18 @@ export default function ChatPage() {
   const [newChannelModalVisible, setNewChannelModalVisible] = useState(false)
   const [form] = Form.useForm()
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const messageInputRef = useRef<HTMLTextAreaElement>(null)
+  const [messageText, setMessageText] = useState('')
 
   // Fetch channels
   const { data: channels, refetch: refetchChannels } =
-    Api.channel.findMany.useQuery({
+    Api.channel.findMany.useQuery<Channel[]>({
       where: { organizationId },
       include: { messages: { include: { user: true } } },
     })
 
   // Fetch messages for selected channel
   const { data: messages, refetch: refetchMessages } =
-    Api.message.findMany.useQuery(
+    Api.message.findMany.useQuery<Message[]>(
       {
         where: { channelId: selectedChannel },
         include: { user: true },
@@ -80,9 +97,7 @@ export default function ChatPage() {
       },
     })
     refetchMessages()
-    if (messageInputRef.current) {
-      messageInputRef.current.value = ''
-    }
+    setMessageText('')
   }
 
   const filteredMessages = messages?.filter(message =>
@@ -247,13 +262,13 @@ export default function ChatPage() {
                 </div>
 
                 <TextArea
-                  ref={messageInputRef}
+                  value={messageText}
+                  onChange={e => setMessageText(e.target.value)}
                   placeholder="Type your message..."
                   autoSize={{ minRows: 2, maxRows: 4 }}
                   onPressEnter={e => {
                     e.preventDefault()
-                    handleSendMessage((e.target as HTMLTextAreaElement).value)
-                    ;(e.target as HTMLTextAreaElement).value = ''
+                    handleSendMessage(messageText)
                   }}
                   style={{
                     borderRadius: '20px',
@@ -263,12 +278,7 @@ export default function ChatPage() {
                 />
                 <Button
                   type="primary"
-                  onClick={() => {
-                    if (messageInputRef.current) {
-                      handleSendMessage(messageInputRef.current.value)
-                      messageInputRef.current.value = ''
-                    }
-                  }}
+                  onClick={() => handleSendMessage(messageText)}
                   style={{
                     borderRadius: '20px',
                     width: '100%',

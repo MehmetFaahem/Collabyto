@@ -10,6 +10,8 @@ import {
   UploadPublicOptions,
   UploadPublicReturn,
 } from '../upload.provider'
+import * as fs from 'fs'
+import * as path from 'path'
 
 export class UploadProviderLocal extends UploadProvider {
   private staticServerUrl: string
@@ -36,17 +38,20 @@ export class UploadProviderLocal extends UploadProvider {
   async uploadPublic({
     file,
   }: UploadPublicOptions): Promise<UploadPublicReturn> {
-    const content = file.buffer
+    const fileName = `${Date.now()}-${file.name}`
+    const uploadDir = path.join(process.cwd(), 'public', 'uploads')
 
-    const filename = this.ensureFilename(file.name)
+    // Ensure upload directory exists
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true })
+    }
 
-    const path = FileHelper.joinPaths(this.pathPublicInternal, filename)
+    const filePath = path.join(uploadDir, fileName)
+    await fs.promises.writeFile(filePath, file.buffer)
 
-    FileHelper.writeFile(path, content)
-
-    const url = `${this.staticServerUrl}${this.pathPublicExternal}/${filename}`
-
-    return { url }
+    return {
+      url: `/uploads/${fileName}`,
+    }
   }
 
   async uploadPrivate({
