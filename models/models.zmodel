@@ -1,0 +1,192 @@
+enum UserStatus {
+    INVITED
+    VERIFIED
+}
+
+model User {
+    id                String             @id @default(uuid())
+    name              String?
+    email             String?            @unique
+    pictureUrl        String?            @default('https://i.imgur.com/ZdJSK3Y.jpeg')
+    tokenInvitation   String?
+
+    status            UserStatus         @default(VERIFIED)
+
+    // this is the role of the user for the application
+    globalRole        String             @default('USER')
+    password          String?            @password @omit
+    createdAt         DateTime           @default(now())
+    updatedAt         DateTime           @updatedAt @default(now())
+
+    organizationRoles OrganizationRole[]
+
+    documentsAsOwner  Document[]         @relation("owner")
+    tasksAsAssignee   Task[]             @relation("assignee")
+    messages          Message[]          @relation("user")
+    filesAsOwner      File[]             @relation("owner")
+
+    @@auth()
+    @@allow("all", auth().id == this.id)
+    @@allow('all', auth().globalRole == 'ADMIN')
+
+    //we only allow that user to register if they don't create an admin role
+    @@allow("create", globalRole != 'ADMIN')
+    @@allow("read", true)
+}
+
+model Folder {
+
+    id                    String        @id @default(uuid())
+    name                  String
+
+    parentFolderId        String?
+    parentFolder          Folder?       @relation(fields: [parentFolderId], references: [id], name: "parentFolder")
+    organizationId        String
+    organization          Organization? @relation(fields: [organizationId], references: [id], name: "organization")
+
+    foldersAsParentFolder Folder[]      @relation("parentFolder")
+    documents             Document[]    @relation("folder")
+    files                 File[]        @relation("folder")
+    createdAt             DateTime      @default(now())
+    updatedAt             DateTime      @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Document {
+
+    id             String        @id @default(uuid())
+    title          String
+    content        String?
+
+    organizationId String
+    organization   Organization? @relation(fields: [organizationId], references: [id], name: "organization")
+    folderId       String?
+    folder         Folder?       @relation(fields: [folderId], references: [id], name: "folder")
+    ownerId        String
+    owner          User?         @relation(fields: [ownerId], references: [id], name: "owner")
+
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Board {
+
+    id             String        @id @default(uuid())
+    name           String
+
+    organizationId String
+    organization   Organization? @relation(fields: [organizationId], references: [id], name: "organization")
+
+    tasks          Task[]        @relation("board")
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Task {
+
+    id          String   @id @default(uuid())
+    title       String
+    description String?
+    dueDate     String?
+    priority    String?
+    status      String?
+
+    boardId     String
+    board       Board?   @relation(fields: [boardId], references: [id], name: "board")
+    assigneeId  String?
+    assignee    User?    @relation(fields: [assigneeId], references: [id], name: "assignee")
+
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Channel {
+
+    id             String        @id @default(uuid())
+    name           String
+
+    organizationId String
+    organization   Organization? @relation(fields: [organizationId], references: [id], name: "organization")
+
+    messages       Message[]     @relation("channel")
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Message {
+
+    id        String   @id @default(uuid())
+    content   String
+
+    channelId String
+    channel   Channel? @relation(fields: [channelId], references: [id], name: "channel")
+    userId    String
+    user      User?    @relation(fields: [userId], references: [id], name: "user")
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model File {
+
+    id             String        @id @default(uuid())
+    name           String
+    url            String
+    type           String?
+    size           String?
+
+    folderId       String?
+    folder         Folder?       @relation(fields: [folderId], references: [id], name: "folder")
+    organizationId String
+    organization   Organization? @relation(fields: [organizationId], references: [id], name: "organization")
+    ownerId        String
+    owner          User?         @relation(fields: [ownerId], references: [id], name: "owner")
+
+    createdAt      DateTime      @default(now())
+    updatedAt      DateTime      @updatedAt @default(now())
+    @@allow("all", true)
+}
+
+model Organization {
+    id         String             @id @default(uuid())
+    name       String
+    pictureUrl String?            @default('https://i.imgur.com/BgkFiid.jpeg')
+
+    createdAt  DateTime           @default(now())
+    updatedAt  DateTime           @updatedAt @default(now())
+    roles      OrganizationRole[]
+
+    folders    Folder[]           @relation("organization")
+    documents  Document[]         @relation("organization")
+    boards     Board[]            @relation("organization")
+    channels   Channel[]          @relation("organization")
+    files      File[]             @relation("organization")
+
+    @@allow('all', auth().globalRole == 'ADMIN')
+    @@allow('all', roles?[user == auth() && name == 'owner'])
+    @@allow('read', roles?[user == auth()])
+}
+
+model OrganizationRole {
+    id             String       @id @default(uuid())
+    name           String
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt @default(now())
+
+    userId         String       @default(auth().id)
+    user           User         @relation(fields: [userId], references: [id])
+    organizationId String
+    organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+    @@allow('all', auth().globalRole == 'ADMIN')
+    @@allow('all', organization.roles?[user == auth() && name == 'owner'])
+    @@allow('create', organization.roles?[user == auth()] && name != 'owner')
+    @@allow('read', organization.roles?[user == auth()])
+    @@allow('delete', auth() == user)
+}
+
