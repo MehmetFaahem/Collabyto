@@ -33,14 +33,12 @@ export default function DashboardPage() {
   })
 
   // Fetch workspace statistics
-  const { data: documentsCount } = Api.document.findMany.useQuery({
+  const { data: documentsCount } = Api.document.count.useQuery({
     where: { organizationId },
-    _count: true,
   })
 
-  const { data: tasksCount } = Api.task.findMany.useQuery({
+  const { data: tasksCount } = Api.task.count.useQuery({
     where: { board: { organizationId } },
-    _count: true,
   })
 
   return (
@@ -60,7 +58,7 @@ export default function DashboardPage() {
             <Card>
               <Statistic
                 title="Total Documents"
-                value={documentsCount?._count || 0}
+                value={documentsCount || 0}
                 prefix={<i className="las la-file-alt" />}
               />
             </Card>
@@ -69,7 +67,7 @@ export default function DashboardPage() {
             <Card>
               <Statistic
                 title="Total Tasks"
-                value={tasksCount?._count || 0}
+                value={tasksCount || 0}
                 prefix={<i className="las la-tasks" />}
               />
             </Card>
