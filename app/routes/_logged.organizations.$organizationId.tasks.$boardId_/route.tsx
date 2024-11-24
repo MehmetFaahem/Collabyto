@@ -9,6 +9,8 @@ import {
   Modal,
   Form,
   Tag,
+  Dropdown,
+  Menu,
 } from 'antd'
 import { useState } from 'react'
 const { Title, Text } = Typography
@@ -28,7 +30,7 @@ export default function TaskBoardPage() {
   const [editingTask, setEditingTask] = useState(null)
   const [form] = Form.useForm()
 
-  const { data: board } = Api.board.findFirst.useQuery({
+  const { data: board, refetch: refetchBoard } = Api.board.findFirst.useQuery({
     where: { id: boardId },
     include: { tasks: true },
   })
@@ -48,6 +50,7 @@ export default function TaskBoardPage() {
     })
     setIsModalVisible(false)
     form.resetFields()
+    refetchBoard()
   }
 
   const handleUpdateTask = async values => {
@@ -58,6 +61,7 @@ export default function TaskBoardPage() {
     setIsModalVisible(false)
     setEditingTask(null)
     form.resetFields()
+    refetchBoard()
   }
 
   const handleStatusChange = async (taskId: string, newStatus: string) => {
@@ -65,6 +69,7 @@ export default function TaskBoardPage() {
       where: { id: taskId },
       data: { status: newStatus },
     })
+    refetchBoard()
   }
 
   const openTaskModal = (task = null) => {
@@ -77,6 +82,75 @@ export default function TaskBoardPage() {
     }
     setIsModalVisible(true)
   }
+
+  const renderTaskCard = task => (
+    <Card
+      key={task.id}
+      size="small"
+      style={{
+        marginBottom: '8px',
+        cursor: 'pointer',
+      }}
+    >
+      <Text strong>{task.title}</Text>
+      <div style={{ marginTop: '8px' }}>
+        {task.priority && (
+          <Tag
+            color={
+              task.priority === 'HIGH'
+                ? 'red'
+                : task.priority === 'MEDIUM'
+                ? 'orange'
+                : 'blue'
+            }
+          >
+            {task.priority}
+          </Tag>
+        )}
+        {task.dueDate && (
+          <Text type="secondary" style={{ marginLeft: '8px' }}>
+            Due: {dayjs(task.dueDate).format('MMM D, YYYY')}
+          </Text>
+        )}
+      </div>
+      <div
+        style={{
+          marginTop: '8px',
+          display: 'flex',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Button
+          type="link"
+          onClick={() => openTaskModal(task)}
+          style={{
+            padding: 0,
+          }}
+        >
+          Edit
+        </Button>
+        <Dropdown
+          overlay={
+            <Menu>
+              {TASK_STATUSES.map(status => (
+                <Menu.Item
+                  key={status}
+                  onClick={() => handleStatusChange(task.id, status)}
+                >
+                  {status}
+                </Menu.Item>
+              ))}
+            </Menu>
+          }
+          trigger={['click']}
+        >
+          <Button type="link" style={{ padding: 0 }}>
+            Change Status
+          </Button>
+        </Dropdown>
+      </div>
+    </Card>
+  )
 
   return (
     <PageLayout layout="full-width">
@@ -96,39 +170,7 @@ export default function TaskBoardPage() {
               <Card title={status} style={{ backgroundColor: '#f5f5f5' }}>
                 {board?.tasks
                   ?.filter(task => task.status === status)
-                  ?.map(task => (
-                    <Card
-                      key={task.id}
-                      size="small"
-                      style={{
-                        marginBottom: '8px',
-                        cursor: 'pointer',
-                      }}
-                      onClick={() => openTaskModal(task)}
-                    >
-                      <Text strong>{task.title}</Text>
-                      <div style={{ marginTop: '8px' }}>
-                        {task.priority && (
-                          <Tag
-                            color={
-                              task.priority === 'HIGH'
-                                ? 'red'
-                                : task.priority === 'MEDIUM'
-                                ? 'orange'
-                                : 'blue'
-                            }
-                          >
-                            {task.priority}
-                          </Tag>
-                        )}
-                        {task.dueDate && (
-                          <Text type="secondary" style={{ marginLeft: '8px' }}>
-                            Due: {dayjs(task.dueDate).format('MMM D, YYYY')}
-                          </Text>
-                        )}
-                      </div>
-                    </Card>
-                  ))}
+                  ?.map(renderTaskCard)}
               </Card>
             </div>
           ))}

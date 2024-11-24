@@ -111,9 +111,9 @@ export default function DashboardPage() {
                     <List.Item.Meta
                       avatar={<Avatar src={doc.owner?.pictureUrl} />}
                       title={doc.title}
-                      description={`Updated ${dayjs(
-                        doc.updatedAt,
-                      ).fromNow()} by ${doc.owner?.name}`}
+                      description={`Updated ${dayjs(doc.updatedAt)} by ${
+                        doc.owner?.name
+                      }`}
                     />
                   </List.Item>
                 )}

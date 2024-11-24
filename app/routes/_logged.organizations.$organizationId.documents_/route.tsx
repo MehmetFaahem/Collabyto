@@ -46,7 +46,9 @@ export default function DocumentsPage() {
       folder: true,
       owner: true,
     },
-    orderBy: sortedInfo.field ? { [sortedInfo.field]: sortedInfo.order === 'ascend' ? 'asc' : 'desc' } : { updatedAt: 'desc' },
+    orderBy: sortedInfo.field
+      ? { [sortedInfo.field]: sortedInfo.order === 'ascend' ? 'asc' : 'desc' }
+      : { updatedAt: 'desc' },
   })
 
   // Fetch folders for organization
@@ -85,8 +87,8 @@ export default function DocumentsPage() {
     try {
       await Promise.all(
         selectedRowKeys.map(id =>
-          Api.document.delete.mutate({ where: { id } })
-        )
+          Api.document.delete.mutate({ where: { id } }),
+        ),
       )
       message.success('Documents deleted successfully')
       setSelectedRowKeys([])
@@ -102,9 +104,9 @@ export default function DocumentsPage() {
         selectedRowKeys.map(id =>
           Api.document.update.mutate({
             where: { id },
-            data: { folderId }
-          })
-        )
+            data: { folderId },
+          }),
+        ),
       )
       message.success('Documents moved successfully')
       setSelectedRowKeys([])
@@ -123,7 +125,12 @@ export default function DocumentsPage() {
       render: (text: string, record: any) => (
         <Space>
           <i className="las la-file-alt" />
-          <Text onClick={() => navigate(`${record.id}`)} style={{ cursor: 'pointer' }}>{text}</Text>
+          <Text
+            onClick={() => navigate(`${record.id}`)}
+            style={{ cursor: 'pointer' }}
+          >
+            {text}
+          </Text>
         </Space>
       ),
     },
@@ -154,14 +161,18 @@ export default function DocumentsPage() {
       dataIndex: 'updatedAt',
       key: 'updatedAt',
       sorter: true,
-      render: (date: string) => dayjs(date).fromNow(),
+      render: (date: string) => date,
     },
     {
       title: 'Actions',
       key: 'actions',
       render: (record: any) => (
         <Space>
-          <Button type="text" icon={<i className="las la-edit" />} onClick={() => navigate(`${record.id}`)} />
+          <Button
+            type="text"
+            icon={<i className="las la-edit" />}
+            onClick={() => navigate(`${record.id}`)}
+          />
           <Popconfirm
             title="Are you sure?"
             onConfirm={() => handleBulkDelete([record.id])}
@@ -258,10 +269,10 @@ export default function DocumentsPage() {
           rowSelection={{
             type: 'checkbox',
             selectedRowKeys,
-            onChange: (keys) => setSelectedRowKeys(keys as string[]),
+            onChange: keys => setSelectedRowKeys(keys as string[]),
           }}
           onChange={(pagination, filters, sorter) => {
-            setSortedInfo(sorter);
+            setSortedInfo(sorter)
           }}
         />
 

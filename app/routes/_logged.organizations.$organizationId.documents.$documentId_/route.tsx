@@ -4,8 +4,7 @@ import { PageLayout } from '@/designSystem'
 import { useNango } from '@/plugins/nango/client'
 import { SocketClient } from '@/plugins/socket/client'
 import { useParams } from '@remix-run/react'
-import 'ace-builds/src-noconflict/mode-text'
-import 'ace-builds/src-noconflict/theme-github'
+import { lazy, useEffect, useRef, useState } from 'react'
 import {
   Button,
   Divider,
@@ -20,10 +19,23 @@ import {
   Typography,
 } from 'antd'
 import dayjs from 'dayjs'
-import { useEffect, useRef, useState } from 'react'
-import { DiffEditor } from 'react-ace'
+import relativeTime from 'dayjs/plugin/relativeTime'
+import DiffEditor from 'react-ace'
 const { Title, Text, Paragraph } = Typography
 const { TextArea } = Input
+
+// Register the plugin
+dayjs.extend(relativeTime)
+
+// 1. Create a client-only component
+const AceEditor = lazy(() => {
+  // Only import if we're in the browser
+  if (typeof window === 'undefined') {
+    return new Promise(() => {})
+  }
+
+  return import('./AceEditorComponent')
+})
 
 export default function DocumentEditorPage() {
   const { documentId, organizationId } = useParams()
@@ -248,7 +260,7 @@ export default function DocumentEditorPage() {
                 </Select.Option>
               </Select>
               <Space>
-                {activeUsers.map(userId => (
+                {activeUsers?.map(userId => (
                   <Tooltip
                     key={userId}
                     title={`${
@@ -317,11 +329,9 @@ export default function DocumentEditorPage() {
                   ]}
                 >
                   <List.Item.Meta
-                    title={`Version from ${dayjs(version.editedAt).format(
-                      'MMM D, YYYY HH:mm',
-                    )}`}
+                    title={`Version from ${dayjs(version?.editedAt)}`}
                     description={`Edited by ${
-                      version.editedBy?.name || 'Unknown'
+                      version?.editedBy?.name || 'Unknown'
                     }`}
                   />
                 </List.Item>

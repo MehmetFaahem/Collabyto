@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "init": "pnpm install && pnpm run docker:init ; pnpm run env:init ; pnpm run crud:sync && pnpm run database:sync:dev && pnpm run database:seed",
-    "dev": "rm -rf build && rm -rf node_modules/.vite && tsx server/index.ts",
+    "dev": "tsx server/index.ts",
     "debug": "NODE_OPTIONS=--inspect-brk tsx server/index.ts",
     "start": "PORT=8099 NODE_ENV=production node ./build/server/index.js",
     "build": "remix vite:build",
@@ -82,7 +82,6 @@
     "zod-form-data": "^2.0.2"
   },
   "devDependencies": {
-    "@marblism/eslint-plugin": "^1.0.0",
     "@remix-run/dev": "^2.13.1",
     "@types/bcryptjs": "^2.4.6",
     "@types/express": "^5.0.0",

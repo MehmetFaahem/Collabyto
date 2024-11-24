@@ -10,7 +10,7 @@ import {
   Modal,
   Form,
 } from 'antd'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 const { Title, Text } = Typography
 const { TextArea } = Input
 import { useUserContext } from '@/core/context'
@@ -28,6 +28,8 @@ export default function ChatPage() {
   const [selectedChannel, setSelectedChannel] = useState<string>('')
   const [newChannelModalVisible, setNewChannelModalVisible] = useState(false)
   const [form] = Form.useForm()
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messageInputRef = useRef<HTMLTextAreaElement>(null)
 
   // Fetch channels
   const { data: channels, refetch: refetchChannels } =
@@ -42,7 +44,7 @@ export default function ChatPage() {
       {
         where: { channelId: selectedChannel },
         include: { user: true },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { createdAt: 'asc' },
       },
       {
         enabled: !!selectedChannel,
@@ -78,11 +80,22 @@ export default function ChatPage() {
       },
     })
     refetchMessages()
+    if (messageInputRef.current) {
+      messageInputRef.current.value = ''
+    }
   }
 
   const filteredMessages = messages?.filter(message =>
     message.content.toLowerCase().includes(searchText.toLowerCase()),
   )
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   return (
     <PageLayout layout="full-width">
@@ -109,16 +122,20 @@ export default function ChatPage() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 marginBottom: '16px',
+                flexDirection: 'column',
               }}
             >
-              <Title level={4}>Channels</Title>
               <Button
                 type="primary"
                 icon={<i className="las la-plus"></i>}
                 onClick={() => setNewChannelModalVisible(true)}
+                style={{
+                  marginBottom: '10px',
+                }}
               >
                 New Channel
               </Button>
+              <Title level={4}>Channels</Title>
             </div>
 
             <List
@@ -163,35 +180,74 @@ export default function ChatPage() {
                     height: '400px',
                     overflowY: 'auto',
                     marginBottom: '16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    padding: '10px',
+                    backgroundColor: '#f9f9f9',
+                    borderRadius: '8px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
                   }}
                 >
                   <List
                     dataSource={filteredMessages}
                     renderItem={message => (
-                      <List.Item>
-                        <List.Item.Meta
-                          avatar={<Avatar src={message.user?.pictureUrl} />}
-                          title={
-                            <Space>
-                              <Text strong>{message.user?.name}</Text>
-                              <Text
-                                type="secondary"
-                                style={{ fontSize: '12px' }}
-                              >
-                                {dayjs(message.createdAt).format(
-                                  'MMM D, YYYY HH:mm',
-                                )}
-                              </Text>
-                            </Space>
-                          }
-                          description={message.content}
+                      <List.Item
+                        style={{
+                          display: 'flex',
+                          flexDirection:
+                            message.user?.id === user?.id
+                              ? 'row-reverse'
+                              : 'row',
+                          alignItems: 'flex-start',
+                          justifyContent:
+                            message.user?.id === user?.id ? 'end' : 'start',
+                          marginBottom: '12px',
+                          padding: '8px',
+                          borderRadius: '8px',
+                          maxWidth: '80%', // Adjusted to prevent full width
+                          marginLeft:
+                            message.user?.id === user?.id ? 'auto' : '0',
+                          marginRight:
+                            message.user?.id === user?.id ? '0' : 'auto',
+                        }}
+                      >
+                        <Avatar
+                          src={message.user?.pictureUrl}
+                          style={{ margin: '0 10px' }}
                         />
+                        <div
+                          style={{
+                            backgroundColor:
+                              message.user?.id === user?.id
+                                ? '#e0ffe0'
+                                : '#f0f0f0',
+                            borderRadius: '12px',
+                            padding: '12px',
+                            maxWidth: '80%', // Ensures the message content doesn't exceed the item width
+                            wordBreak: 'break-word',
+                          }}
+                        >
+                          <Space direction="vertical" size={4}>
+                            <Text strong>{message.user?.name}</Text>
+                            <Text>{message.content}</Text>
+                            <Text
+                              type="secondary"
+                              style={{ fontSize: '12px', textAlign: 'right' }}
+                            >
+                              {dayjs(message.createdAt).format(
+                                'MMM D, YYYY HH:mm',
+                              )}
+                            </Text>
+                          </Space>
+                        </div>
                       </List.Item>
                     )}
                   />
+                  <div ref={messagesEndRef} />
                 </div>
 
                 <TextArea
+                  ref={messageInputRef}
                   placeholder="Type your message..."
                   autoSize={{ minRows: 2, maxRows: 4 }}
                   onPressEnter={e => {
@@ -199,7 +255,27 @@ export default function ChatPage() {
                     handleSendMessage((e.target as HTMLTextAreaElement).value)
                     ;(e.target as HTMLTextAreaElement).value = ''
                   }}
+                  style={{
+                    borderRadius: '20px',
+                    padding: '10px',
+                    marginBottom: '10px',
+                  }}
                 />
+                <Button
+                  type="primary"
+                  onClick={() => {
+                    if (messageInputRef.current) {
+                      handleSendMessage(messageInputRef.current.value)
+                      messageInputRef.current.value = ''
+                    }
+                  }}
+                  style={{
+                    borderRadius: '20px',
+                    width: '100%',
+                  }}
+                >
+                  Send
+                </Button>
               </>
             ) : (
               <div style={{ textAlign: 'center', padding: '40px' }}>
