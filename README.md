@@ -1,64 +1,89 @@
-<div style="background: black;">
-<p align="center" style="margin: 0;">
-  <a href="https://dev.marblism.com" target="blank">
-    <img src="https://marblism-dashboard-api--production-public.s3.us-west-1.amazonaws.com/marblism-logo.png" height="150" alt="Marblism Logo" />
-  </a>
-</p>
-<h1 align="center" style="margin: 0;">In Marble We Trust</h1>
+# Project Documentation
 
-<a  style="margin: 0;" target="_blank" href="https://marblism.com">
-<p align="center" style="margin: 0; letter-spacing: 3px;
-text-decoration: none;">
-marblism
-</p>
-</a>
-</div>
-<div style="height: 50px; background: linear-gradient(#000000, transparent);"></div>
+## Overview
 
-## Documentation
+This project is a comprehensive web application designed to facilitate team collaboration and document management within organizations. It includes features such as real-time chat, document uploads, task management, and workspace dashboards. The application is built using modern web technologies and follows best practices for maintainability and scalability.
 
-Learn more in the [official documentation](https://dev.marblism.com).
+## Features
 
-## Installation
+### 1. Real-Time Chat
 
-<div style="color: red;">
+- **Team Chat**: Communicate with your team in real-time using the chat feature. Users can send messages, create channels, and search through message history.
+- **Message Filtering**: Filter messages based on content to quickly find relevant information.
+- **Smooth Scrolling**: Automatically scroll to the latest messages for a seamless chat experience.
 
-> ⚠️ **Important**<br/>Make sure the following tools are installed on your computer
+### 2. Document Management
 
-<p align="center">
+- **Upload Documents**: Upload both public and private documents securely. The application supports file uploads with proper directory management.
+- **Recent Documents**: View a list of recently updated documents along with their owners and last modified dates.
 
-<a target="_blank" href="https://www.docker.com/get-started/">![Docker Desktop Version](https://img.shields.io/badge/Docker%20Desktop-4.19.0-black?logo=docker)</a>
-<a target="_blank" href="https://nodejs.org/en">![Node.js version](https://img.shields.io/badge/Node.js-20.11.0-black?logo=nodedotjs)</a>
-<a target="_blank" href="https://www.npmjs.com/">![npm Version](https://img.shields.io/badge/npm-10.2.4-black?logo=npm)</a>
+### 3. Task Management
 
-</p>
-</div>
+- **Task Overview**: Manage tasks within the organization. View recent tasks, their statuses, and due dates.
+- **Assignee Information**: Each task displays the assignee's information for better accountability.
 
-<br />
+### 4. Workspace Dashboard
 
-```bash
-$ pnpm run init
-```
+- **Statistics**: Get an overview of workspace activities with statistics on total documents, tasks, team members, and active projects.
+- **Recent Activities**: View recent documents and tasks to stay updated on the latest changes within the organization.
+- **Team Members**: See a list of active team members and their roles within the organization.
 
-## Development
+### 5. User and Organization Management
 
-```bash
-$ pnpm run dev
-```
+- **User Context**: Manage user information and context throughout the application.
+- **Organization Roles**: Handle different roles within the organization to ensure proper access control and permissions.
 
-[View your application in your browser](http://localhost:8099)
+## Technical Details
 
-## Production
+### Technologies Used
 
-```bash
-$ pnpm run build
-$ pnpm run start
-```
+- **Frontend**: React, TypeScript, Ant Design for UI components.
+- **Backend**: Node.js, TypeScript, TRPC for API handling.
+- **Database**: Prisma ORM for database interactions.
+- **Real-Time Communication**: Socket.io for real-time chat functionality.
+- **File Management**: Local file system for document storage.
 
-## Support
+### Code Structure
 
-We reply FAST on our <a target="_blank" href="https://discord.gg/GScNz7kAEu">Discord server</a>.
+- **Routes**: Organized by feature, with separate files for chat, documents, and dashboard functionalities.
+- **Components**: Reusable UI components built with Ant Design.
+- **API**: TRPC for type-safe API calls and data fetching.
 
-## Stay in touch
+## Getting Started
 
-[@marblismAI](https://twitter.com/marblismAI)
+### Prerequisites
+
+- Node.js and npm installed on your machine.
+- A running instance of the database.
+
+### Installation
+
+1. Clone the repository:
+   ```sh
+   git clone https://github.com/your-repo/project.git
+   ```
+2. Install dependencies:
+   ```sh
+   cd project
+   npm install
+   ```
+3. Set up environment variables:
+   ```sh
+   cp .env.example .env
+   ```
+4. Run the development server:
+   ```sh
+   npm run dev
+   ```
+
+### Deployment
+
+Follow the deployment guide specific to your hosting provider. Ensure all environment variables are set correctly for production.
+
+## Contributing
+
+We welcome contributions from the community. Please read our contributing guidelines before submitting a pull request.
+
+## License
+
+This project is licensed under the MIT License. See the LICENSE file for more details.
