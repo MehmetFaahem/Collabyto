@@ -1,3 +1,5 @@
+# Real-Time Collaboration Platform for Remote Teams
+
 # Project Documentation
 
 ## Overview
